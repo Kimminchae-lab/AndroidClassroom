@@ -14,7 +14,7 @@ public class MainActivity extends AppCompatActivity {
 
     // 1. 참조 변수 선언
     TextView Timer;
-    Button btnStart, btnPause, btnReset;
+    Button btnStart, btnStop, btnPauseRestart;
     CountDownTimer countDownTimer;
 
     @Override
@@ -25,9 +25,39 @@ public class MainActivity extends AppCompatActivity {
         // 2. 참조변수에 위젯 연결
         Timer = (TextView) findViewById(R.id.text);
         btnStart = (Button) findViewById(R.id.btnStart);
-        btnPause = (Button) findViewById(R.id.btnPause);
-        btnReset = (Button) findViewById(R.id.btnReset);
+        btnStop = (Button) findViewById(R.id.btnStop);
+        btnPauseRestart = (Button) findViewById(R.id.btnPauseRestart);
 
+        countDownTimer(30 * 1000, 1000);
+
+
+        btnStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                countDownTimer.start();
+            }
+        });
+
+        btnStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                countDownTimer.cancel();
+            }
+        });
+
+        btnPauseRestart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (btnPauseRestart.getText().equals("PAUSE")) {
+                    btnPauseRestart.setText("RESTART");
+                } else {
+                    btnPauseRestart.setText("PAUSE");
+                }
+            }
+        });
+    }
+
+    private void countDownTimer(long millisInFuture, long countDownInterval) {
         countDownTimer = new CountDownTimer(30 * 1000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -39,12 +69,5 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "CountDown Finished", Toast.LENGTH_SHORT).show();
             }
         };
-
-        btnStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                countDownTimer.start();
-            }
-        });
     }
 }
