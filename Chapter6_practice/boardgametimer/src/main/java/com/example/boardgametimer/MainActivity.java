@@ -158,6 +158,12 @@ public class MainActivity extends AppCompatActivity {
 
     // 타이머 리셋 메소드
     private void resetTimer() {
+        if (editTextEnteredSeconds.getText().toString().equals("")) {
+            Toast.makeText(MainActivity.this, "입력값이 없습니다.", Toast.LENGTH_SHORT).show();
+            editTextEnteredSeconds.setText(String.valueOf(fullTime));
+            return;
+        }
+
         fullTime = Long.parseLong(editTextEnteredSeconds.getText().toString());
         halfTime = Math.round(fullTime / 2);
 
@@ -167,6 +173,8 @@ public class MainActivity extends AppCompatActivity {
         btnTimerSwitch.setTextColor(Color.BLACK);
         btnTimerSwitch.setText(String.valueOf(fullTime));
     }
+
+
 
     // 숫자 크기에 따른 텍스트 크기 조정
     private void changeTextSize(long seconds) {
