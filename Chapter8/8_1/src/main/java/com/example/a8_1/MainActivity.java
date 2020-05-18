@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
                     outFs.write(str.getBytes());
                     outFs.close();
                     Toast.makeText(getApplicationContext(),fileName+"이 저장됨",Toast.LENGTH_SHORT).show();
-                }catch (IOException e ){
+                } catch (IOException e) {
 
                 }
             }
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
             inFs.close();
             diaryStr = (new String(txt)).trim();
             btnWrite.setText("수정하기");
-        }catch (IOException e){
+        } catch (IOException e) {
             edtDiary.setHint("일기가 존재하지 않음");
             btnWrite.setText("새 일기 저장");
         }
