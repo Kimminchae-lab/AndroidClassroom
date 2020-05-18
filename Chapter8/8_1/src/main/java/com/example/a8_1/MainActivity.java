@@ -75,8 +75,8 @@ public class MainActivity extends AppCompatActivity {
             diaryStr = (new String(txt)).trim();
             btnWrite.setText("수정하기");
         }catch (IOException e){
-            edtDiary.setHint("일기 없음");
-            btnWrite.setText("새로 저장");
+            edtDiary.setHint("일기가 존재하지 않음");
+            btnWrite.setText("새 일기 저장");
         }
         return diaryStr;
     }
