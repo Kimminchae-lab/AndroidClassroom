@@ -18,6 +18,8 @@ public class MainActivity extends AppCompatActivity {
             , R.id.iv5, R.id.iv6, R.id.iv7, R.id.iv8, R.id.iv9};
     String[] imageNames = {"이미지1", "이미지2", "이미지3", "이미지4"   // 이미지들의 이름을 저정한 배열
             , "이미지5", "이미지6", "이미지7", "이미지8", "이미지9"};
+    int[] imgs = {R.drawable.kakao01,R.drawable.kakao02,R.drawable.kakao03,R.drawable.kakao04
+    ,R.drawable.kakao05,R.drawable.kakao06,R.drawable.kakao07,R.drawable.kakao08,R.drawable.kakao09};
     int[] voteCount = new int[9];    // 각 이미지의 클릭 횟수 저장 배열
     //endregion
 
@@ -49,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), ResultActivity.class);  // 명시적 인텐트 객체 생성
                 intent.putExtra("nameData", imageNames);
                 intent.putExtra("voteData", voteCount);
+                intent.putExtra("imgName", imgs);
                 startActivity(intent);
             }
         });
