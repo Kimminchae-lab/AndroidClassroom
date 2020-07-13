@@ -217,7 +217,7 @@ public class MainActivity extends AppCompatActivity
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     builder.setTitle("목적지 설정: " + markerTitle);
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton("설정", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             //현재 위치에 마커 생성하고 이동
@@ -234,10 +234,36 @@ public class MainActivity extends AppCompatActivity
                     builder.setNegativeButton("CANCEL", null);
                     builder.show();
                 }
+
+                else {
+                    final String markerTitle = getCurrentAddress(latLng);
+                    final String markerSnippet = "위도:" + String.valueOf(latLng.latitude)
+                            + " 경도:" + String.valueOf(latLng.longitude);
+                    destination = new Location(String.valueOf(latLng.latitude) + String.valueOf(latLng.longitude));
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("목적지 변경: " + markerTitle);
+                    builder.setPositiveButton("변경", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            MarkerOptions newDestination = new MarkerOptions();
+                            newDestination.position(latLng);
+                            newDestination.title(markerTitle);
+
+                            mGoogleMap.addMarker(newDestination);
+
+                            dest = true;
+                        }
+                    });
+
+                    builder.setNegativeButton("취소", null);
+                    builder.show();
+                }
             }
         });
         // endregion
 
+        // region setOnCameraMoveStartedListener
         mGoogleMap.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
             @Override
             public void onCameraMoveStarted(int i) {
@@ -248,13 +274,16 @@ public class MainActivity extends AppCompatActivity
                 mMoveMapByUser = true;
             }
         });
+        // endregion
 
+        // region setOnCameraMoveListener
         mGoogleMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
             public void onCameraMove() {
 
             }
         });
+        // endregion
     }
 
     // region onLocationChanged
@@ -394,6 +423,7 @@ public class MainActivity extends AppCompatActivity
     }
     // endregion
 
+    // region setCurrentLocation
     public void setCurrentLocation(Location location, String markerTitle, String markerSnippet) {
         mMoveMapByUser = false;
 
@@ -415,7 +445,9 @@ public class MainActivity extends AppCompatActivity
             mGoogleMap.moveCamera(cameraUpdate);
         }
     }
+    // endregion
 
+    // region setDefaultLocation
     public void setDefaultLocation() {
         mMoveMapByUser = false;
 
@@ -437,6 +469,7 @@ public class MainActivity extends AppCompatActivity
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, 15);
         mGoogleMap.moveCamera(cameraUpdate);
     }
+    // endregion
 
     // region 런타임 permission 처리을 위한 메소드들
     @TargetApi(Build.VERSION_CODES.M)
@@ -541,7 +574,7 @@ public class MainActivity extends AppCompatActivity
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("위치 서비스 비활성화");
         builder.setMessage("앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n"
-                + "위치 설정을 수정하실래요?");
+                + "위치 설정을 수정하시겠습니까?");
         builder.setCancelable(true);
         builder.setPositiveButton("설정", new DialogInterface.OnClickListener() {
             @Override
