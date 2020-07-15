@@ -5,15 +5,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".Destination">
+    tools:context=".RecentDestination">
 
     <TextView
-        android:id="@+id/backToMap1"
+        android:id="@+id/recentDestination"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:text="Back To Menu"
+        android:text="Recent Destination"
         android:textSize="30sp"
+        android:layout_marginTop="20dp"
+        android:gravity="center_horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -25,6 +26,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/backToMap1" />
+        app:layout_constraintTop_toBottomOf="@+id/recentDestination" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
