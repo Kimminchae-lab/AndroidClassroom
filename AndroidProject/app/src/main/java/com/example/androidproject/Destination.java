@@ -20,13 +20,6 @@ public class Destination extends AppCompatActivity {
     String temp;
 
     @Override
-    protected void onNewIntent(Intent intent) {
-        intent = getIntent();
-        desList.add(intent.getStringExtra("destination"));
-        super.onNewIntent(intent);
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_destination);
@@ -39,11 +32,10 @@ public class Destination extends AppCompatActivity {
         desList = new ArrayList<>();
 
         Intent intent = getIntent();
-        onNewIntent(intent);
 
 
         if (temp != intent.getStringExtra("destination")) {
-            desList.add(intent.getStringExtra("destination"));
+            desList.add(cnt, intent.getStringExtra("destination"));
             cnt++;
             temp = intent.getStringExtra("destination");
         }

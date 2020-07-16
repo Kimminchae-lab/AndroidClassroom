@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -40,6 +41,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.io.IOException;
 import java.util.List;
@@ -69,11 +72,18 @@ public class MainActivity extends AppCompatActivity
     boolean mMoveMapByUser = true;
     boolean mMoveMapByAPI = true;
     LatLng currentPosition;
-    int requestCode = 1;
-    public MarkerOptions desMarker;
+    public Marker desMarker;
+    public Marker newDestinaton;
+    public int cnt = 0;
+    public int cnt1 = 0;
+    Polyline line;
+    Intent intent;
+    public LatLng desLatLng;
+    int CODE = 1;
 
     public Location destination;
     public boolean dest; // 목적지를 설정했는지
+    public String recentDestination;
     // endregion
 
     // region 위치 정확도, 위치 업데이트 수신 간격 설정
@@ -87,8 +97,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
+        setTitle("Google Map");
 
         Log.d(TAG, "onCreate");
         mActivity = this;
@@ -116,15 +126,24 @@ public class MainActivity extends AppCompatActivity
 
     // region onOptionsItemSelected
     @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch(item.getItemId()){
-            case R.id.recent:
-                Intent rDes = new Intent(this, RecentDestination.class);
-                startActivityForResult(rDes, requestCode);
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.cal:
+                if (cnt1 == 0) {
+                    intent = new Intent(MainActivity.this, getWeight.class);
+                    intent.putExtra("distance", getDistance(desLatLng, currentPosition));
+                    startActivityForResult(intent, CODE);
+                } else {
+                    intent = new Intent(MainActivity.this, Calorie.class);
+                    intent.putExtra("distance", getDistance(desLatLng, currentPosition) / 6.0);
+                    startActivityForResult(intent, CODE);
+                }
+                cnt1++;
                 return true;
-            case R.id.calorie:
-                Intent rCal = new Intent(this, Calorie.class);
-                startActivityForResult(rCal, requestCode);
+            case R.id.des:
+                intent = new Intent(MainActivity.this, Destination.class);
+                intent.putExtra("destination", recentDestination);
+                startActivityForResult(intent, CODE);
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -162,14 +181,11 @@ public class MainActivity extends AppCompatActivity
                 Log.d(TAG, "startLocationUpdates : 퍼미션 안가지고 있음");
                 return;
             }
-
-
             Log.d(TAG, "startLocationUpdates : call FusedLocationApi.requestLocationUpdates");
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
             mRequestingLocationUpdates = true;
 
             mGoogleMap.setMyLocationEnabled(true);
-
         }
     }
     // endregion
@@ -221,17 +237,16 @@ public class MainActivity extends AppCompatActivity
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             //현재 위치에 마커 생성하고 이동
-                            MarkerOptions markerOptions = new MarkerOptions();
-                            markerOptions.position(latLng);
-                            markerOptions.title(markerTitle);
-
-                            mGoogleMap.addMarker(markerOptions);
-
+                            desMarker = mGoogleMap.addMarker(new MarkerOptions().position(latLng).title(markerTitle));
                             dest = true;
+                            drawLine(currentPosition, latLng);
+                            moveCamera(latLng, 15);
+                            desLatLng = latLng;
+                            recentDestination = markerTitle;
                         }
                     });
 
-                    builder.setNegativeButton("CANCEL", null);
+                    builder.setNegativeButton("취소", null);
                     builder.show();
                 }
 
@@ -246,13 +261,36 @@ public class MainActivity extends AppCompatActivity
                     builder.setPositiveButton("변경", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            MarkerOptions newDestination = new MarkerOptions();
-                            newDestination.position(latLng);
-                            newDestination.title(markerTitle);
 
-                            mGoogleMap.addMarker(newDestination);
+                            AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
+                            builder1.setTitle("목적지가 이미 설정됨");
+                            builder1.setMessage("목적지가 이미 설정되어 있습니다. 목적지를 변경하시겠습니까?");
+                            builder1.setPositiveButton("변경", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    desMarker.remove();
+                                    if (cnt > 0) {
+                                        newDestinaton.remove();
+                                        newDestinaton = mGoogleMap.addMarker(new MarkerOptions().position(latLng).title(markerTitle));
+                                        drawLine(currentPosition, latLng);
+                                        moveCamera(latLng, 15);
+                                        desLatLng = latLng;
+                                        recentDestination = markerTitle;
+                                    }
+                                    else {
+                                        cnt++;
+                                        newDestinaton = mGoogleMap.addMarker(new MarkerOptions().position(latLng).title(markerTitle));
+                                        drawLine(currentPosition, latLng);
+                                        moveCamera(latLng, 15);
+                                        desLatLng = latLng;
+                                        recentDestination = markerTitle;
+                                    }
+                                }
+                            });
 
-                            dest = true;
+                            builder1.setNegativeButton("취소", null);
+                            builder1.show();
+
                         }
                     });
 
@@ -286,6 +324,36 @@ public class MainActivity extends AppCompatActivity
         // endregion
     }
 
+    // region drawLine
+    public void drawLine(LatLng l1, LatLng l2) {
+        if (line != null)
+            line.remove();
+            line = mGoogleMap.addPolyline(new PolylineOptions()
+                    .add(l1, l2)
+                    .width(5)
+                    .color(Color.RED));
+    }
+    // endregion
+
+    // region moveCamera
+    public void moveCamera(LatLng latLng, float scope) {
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, scope);
+        mGoogleMap.moveCamera(cameraUpdate);
+    }
+    // endregion
+
+    public double getDistance(LatLng l1, LatLng l2) {
+        Location locationA = new Location("point A");
+        locationA.setLatitude(l1.latitude);
+        locationA.setLongitude(l1.longitude);
+
+        Location locationB = new Location("point B");
+        locationB.setLatitude(l2.latitude);
+        locationB.setLongitude(l2.longitude);
+
+        return locationA.distanceTo(locationB);
+    }
+
     // region onLocationChanged
     @Override
     public void onLocationChanged(Location location) {
@@ -297,10 +365,13 @@ public class MainActivity extends AppCompatActivity
         String markerSnippet = "위도:" + String.valueOf(location.getLatitude())
                 + " 경도:" + String.valueOf(location.getLongitude());
 
-        //현재 위치에 마커 생성하고 이동
-        setCurrentLocation(location, markerTitle, markerSnippet);
-
-        mCurrentLocatiion = location;
+        if (currentPosition == desLatLng) {
+            Toast.makeText(getApplicationContext(), "목적지에 도착했습니다", Toast.LENGTH_SHORT).show();
+        }
+        else {
+            //현재 위치에 마커 생성하고 이동
+            setCurrentLocation(location, markerTitle, markerSnippet);
+        }
     }
     // endregion
 
@@ -395,7 +466,7 @@ public class MainActivity extends AppCompatActivity
                     1);
         } catch (IOException ioException) {
             // 네트워크 문제
-            Toast.makeText(this, "지오코더 서비스 사용불가", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "네트워크에 연결되지 않음", Toast.LENGTH_LONG).show();
             return "지오코더 서비스 사용불가";
         } catch (IllegalArgumentException illegalArgumentException) {
             Toast.makeText(this, "잘못된 GPS 좌표", Toast.LENGTH_LONG).show();
@@ -410,7 +481,6 @@ public class MainActivity extends AppCompatActivity
             Address address = addresses.get(0);
             return address.getAddressLine(0).toString();
         }
-
     }
     // endregion
 
