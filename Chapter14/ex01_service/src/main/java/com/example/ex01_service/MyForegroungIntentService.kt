@@ -1,90 +1,54 @@
 package com.example.ex01_service
 
 import android.app.IntentService
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Intent
 import android.content.Context
+import android.graphics.Color
+import android.os.SystemClock
+import android.util.Log
+import androidx.core.app.NotificationCompat
 
-// TODO: Rename actions, choose action names that describe tasks that this
-// IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
-private const val ACTION_FOO = "com.example.ex01_service.action.FOO"
-private const val ACTION_BAZ = "com.example.ex01_service.action.BAZ"
+class MyForegroungIntentService : IntentService("MyIntentService") {
 
-// TODO: Rename parameters
-private const val EXTRA_PARAM1 = "com.example.ex01_service.extra.PARAM1"
-private const val EXTRA_PARAM2 = "com.example.ex01_service.extra.PARAM2"
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d("test", "인텐트 서비스 시작")
 
-/**
- * An [IntentService] subclass for handling asynchronous task requests in
- * a service on a separate handler thread.
- * TODO: Customize class - update intent actions, extra parameters and static
- * helper methods.
- */
-class MyForegroungIntentService : IntentService("MyForegroungIntentService") {
+        // Show Notification
+        val manager: NotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        val channel = NotificationChannel("test", "Service", NotificationManager.IMPORTANCE_HIGH)
+        channel.enableLights(true)
+        channel.lightColor
+        channel.enableVibration(true)
+        manager.createNotificationChannel(channel)
+
+        val builder = NotificationCompat.Builder(this, "test")
+        builder.setSmallIcon(android.R.drawable.ic_menu_search)
+        builder.setContentTitle("서비스 가동")
+        builder.setContentText("서비스 가동 중입니다.")
+        builder.setAutoCancel(true)
+        // val notification =
+
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("test", "인텐트 서비스 종료")
+    }
 
     override fun onHandleIntent(intent: Intent?) {
-        when (intent?.action) {
-            ACTION_FOO -> {
-                val param1 = intent.getStringExtra(EXTRA_PARAM1)
-                val param2 = intent.getStringExtra(EXTRA_PARAM2)
-                handleActionFoo(param1, param2)
-            }
-            ACTION_BAZ -> {
-                val param1 = intent.getStringExtra(EXTRA_PARAM1)
-                val param2 = intent.getStringExtra(EXTRA_PARAM2)
-                handleActionBaz(param1, param2)
-            }
-        }
-    }
-
-    /**
-     * Handle action Foo in the provided background thread with the provided
-     * parameters.
-     */
-    private fun handleActionFoo(param1: String, param2: String) {
-        TODO("Handle action Foo")
-    }
-
-    /**
-     * Handle action Baz in the provided background thread with the provided
-     * parameters.
-     */
-    private fun handleActionBaz(param1: String, param2: String) {
-        TODO("Handle action Baz")
-    }
-
-    companion object {
-        /**
-         * Starts this service to perform action Foo with the given parameters. If
-         * the service is already performing a task this action will be queued.
-         *
-         * @see IntentService
-         */
-        // TODO: Customize helper method
-        @JvmStatic
-        fun startActionFoo(context: Context, param1: String, param2: String) {
-            val intent = Intent(context, MyForegroungIntentService::class.java).apply {
-                action = ACTION_FOO
-                putExtra(EXTRA_PARAM1, param1)
-                putExtra(EXTRA_PARAM2, param2)
-            }
-            context.startService(intent)
+        for(i in 1..10) {
+            SystemClock.sleep(1000)
+            val time = System.currentTimeMillis();
+            Log.d("test", "Service Running...." + time)
         }
 
-        /**
-         * Starts this service to perform action Baz with the given parameters. If
-         * the service is already performing a task this action will be queued.
-         *
-         * @see IntentService
-         */
-        // TODO: Customize helper method
-        @JvmStatic
-        fun startActionBaz(context: Context, param1: String, param2: String) {
-            val intent = Intent(context, MyForegroungIntentService::class.java).apply {
-                action = ACTION_BAZ
-                putExtra(EXTRA_PARAM1, param1)
-                putExtra(EXTRA_PARAM2, param2)
-            }
-            context.startService(intent)
-        }
+        // Delete Notification Message when Thread completed
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        val manager: NotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        manager.cancel(100)
     }
+
 }
